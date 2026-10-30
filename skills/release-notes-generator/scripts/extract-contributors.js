@@ -9,7 +9,7 @@
  * - GitHub contributor metadata (when available)
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const path = require('path');
 
 /**
@@ -20,10 +20,16 @@ const path = require('path');
  */
 function getGitContributors(fromRef, toRef = 'HEAD') {
   try {
-    const format = '%an|%ae|%s';
-    const command = `git log ${fromRef}..${toRef} --pretty=format:"${format}" --reverse`;
+    if (!/^[A-Za-z0-9._\/-]+$/.test(fromRef) || fromRef.startsWith('-')) {
+      throw new Error(`Invalid fromRef: ${fromRef}`);
+    }
+    if (!/^[A-Za-z0-9._\/-]+$/.test(toRef) || toRef.startsWith('-')) {
+      throw new Error(`Invalid toRef: ${toRef}`);
+    }
 
-    const output = execSync(command, { encoding: 'utf8', cwd: process.cwd() });
+    const format = '%an|%ae|%s';
+    const output = execFileSync('git', ['log', `${fromRef}..${toRef}`, `--pretty=format:${format}`, '--reverse'],
+      { encoding: 'utf8', cwd: process.cwd() });
 
     if (!output.trim()) {
       return [];
@@ -71,10 +77,16 @@ function getGitContributors(fromRef, toRef = 'HEAD') {
  */
 function getPRContributors(fromRef, toRef = 'HEAD') {
   try {
-    const format = '%an|%ae|%s';
-    const command = `git log ${fromRef}..${toRef} --merges --pretty=format:"${format}"`;
+    if (!/^[A-Za-z0-9._\/-]+$/.test(fromRef) || fromRef.startsWith('-')) {
+      throw new Error(`Invalid fromRef: ${fromRef}`);
+    }
+    if (!/^[A-Za-z0-9._\/-]+$/.test(toRef) || toRef.startsWith('-')) {
+      throw new Error(`Invalid toRef: ${toRef}`);
+    }
 
-    const output = execSync(command, { encoding: 'utf8', cwd: process.cwd() });
+    const format = '%an|%ae|%s';
+    const output = execFileSync('git', ['log', `${fromRef}..${toRef}`, '--merges', `--pretty=format:${format}`],
+      { encoding: 'utf8', cwd: process.cwd() });
 
     if (!output.trim()) {
       return [];
