@@ -1,0 +1,177 @@
+---
+# Lefthook configuration for git hooks
+# Install: npm install -D lefthook && lefthook install
+# Uninstall: lefthook uninstall
+
+fail_text: |
+  ❌ Hook failed. Review the errors above and fix before retrying.
+  To bypass hooks (not recommended): git commit --no-verify
+
+skip_output:
+  - meta
+
+# Pre-commit hooks: run before git commit
+pre-commit:
+  parallel: false
+  commands:
+    markdown-lint:
+      glob: "*.md"
+      description: "🔍 Linting markdown files"
+      run: |
+        if command -v markdownlint &> /dev/null; then
+          markdownlint --config .markdownlint.json {staged_files}
+        else
+          echo "⚠️  markdownlint not installed (npm install -D markdownlint-cli)"
+        fi
+      skip:
+        - merge
+        - rebase
+
+    json-validate:
+      glob: "*.json"
+      description: "🔍 Validating JSON files"
+      run: |
+        for file in {staged_files}; do
+          if ! node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" 2>/dev/null; then
+            echo "❌ Invalid JSON in $file"
+            exit 1
+          fi
+        done
+      skip:
+        - merge
+        - rebase
+
+    yaml-lint:
+      glob: "*.yml *.yaml"
+      description: "🔍 Validating YAML files"
+      run: |
+        if command -v yamllint &> /dev/null; then
+          yamllint {staged_files}
+        else
+          echo "⚠️  yamllint not installed"
+        fi
+      skip:
+        - merge
+        - rebase
+
+# Pre-push hooks: run before git push
+pre-push:
+  parallel: false
+  commands:
+    tests:
+      description: "🧪 Running tests"
+      run: |
+        if [ -f "package.json" ]; then
+          if grep -q '"test"' package.json; then
+            npm test
+          else
+            echo "⚠️  No npm test script found"
+          fi
+        elif [ -f "composer.json" ]; then
+          if grep -q '"test"' composer.json; then
+            composer test
+          else
+            echo "⚠️  No composer test script found"
+          fi
+        else
+          echo "ℹ️  No test script found"
+        fi
+      skip:
+        - merge
+        - rebase
+
+    lint:
+      description: "✨ Running linters"
+      run: |
+        if [ -f "package.json" ]; then
+          if grep -q '"lint"' package.json; then
+            npm run lint
+          else
+            echo "⚠️  No npm lint script found"
+          fi
+        fi
+      skip:
+        - merge
+        - rebase
+
+    documentation:
+      description: "📚 Checking documentation"
+      run: |
+        # Verify key files exist
+        files_to_check=("README.md" "SKILL.md" "LICENSE")
+        for file in "${files_to_check[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+        done
+        echo "✅ Documentation files present"
+      skip:
+        - merge
+        - rebase
+
+# Commit-msg hooks: validate commit message format
+commit-msg:
+  parallel: false
+  commands:
+    conventional-commits:
+      description: "📝 Validating commit message format"
+      run: |
+        # Validate conventional commit format
+        # Format: type(scope): subject
+        # Types: feat, fix, docs, style, refactor, perf, test, chore
+
+        commit_msg=$(cat $1)
+
+        # Skip merge/rebase commits
+        if [[ "$commit_msg" =~ ^Merge|^Rebase ]]; then
+          exit 0
+        fi
+
+        # Check conventional commit format
+        if ! echo "$commit_msg" | grep -E '^(feat|fix|docs|style|refactor|perf|test|chore)(\(.+\))?!?: .{1,}' > /dev/null; then
+          echo "❌ Commit message does not follow Conventional Commits format"
+          echo ""
+          echo "Expected format:"
+          echo "  feat(scope): description"
+          echo "  fix: description"
+          echo "  docs: description"
+          echo ""
+          echo "Examples:"
+          echo "  feat(release-qa): Add security validation gate"
+          echo "  fix: Correct version alignment check"
+          echo "  docs: Update README with examples"
+          echo ""
+          exit 1
+        fi
+
+# Post-checkout hooks: run after git checkout
+post-checkout:
+  parallel: false
+  commands:
+    dependencies:
+      description: "📦 Checking dependencies"
+      run: |
+        # Warn if dependencies might be out of sync
+        if git diff HEAD@{1} -- package-lock.json composer.lock 2>/dev/null | grep -q .; then
+          echo "⚠️  Dependencies changed. Consider running: npm install or composer install"
+        fi
+
+# Post-merge hooks: run after git merge
+post-merge:
+  parallel: false
+  commands:
+    dependencies:
+      description: "📦 Checking dependencies"
+      run: |
+        if git diff HEAD@{1} -- package-lock.json composer.lock 2>/dev/null | grep -q .; then
+          echo "⚠️  Dependencies changed. Consider running: npm install or composer install"
+        fi
+
+# Hooks configuration
+hooks:
+  # Enable colorized output
+  colors: true
+
+  # Decorate output
+  verbose: false

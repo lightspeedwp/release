@@ -1,0 +1,43 @@
+{
+  "name": "@lightspeedwp/release-skill",
+  "version": "1.0.0",
+  "description": "Comprehensive release management skill for WordPress block plugins and themes",
+  "author": "LightSpeedWP Release Team",
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lightspeedwp/release.git"
+  },
+  "scripts": {
+    "test": "echo 'ℹ️  No tests configured for skill documentation' && exit 0",
+    "lint": "npm run lint:markdown && npm run lint:json && npm run lint:yaml",
+    "lint:markdown": "markdownlint '*.md' 'agents/**/*.md' 'skills/**/*.md' 'prompts/**/*.md' --config .markdownlint.json",
+    "lint:json": "node scripts/validate-json.js",
+    "lint:yaml": "yamllint '.lefthook.yml' '.github/**/*.yml' .github/**/*.yaml 2>/dev/null || echo '⚠️  yamllint not installed'",
+    "lint:fix": "markdownlint '*.md' 'agents/**/*.md' 'skills/**/*.md' 'prompts/**/*.md' --config .markdownlint.json --fix",
+    "prepare": "lefthook install",
+    "docs:build": "echo 'Documentation is markdown-based. No build needed.'",
+    "docs:validate": "npm run lint && npm run validate:structure",
+    "validate:structure": "node scripts/validate-skill-structure.js",
+    "validate:links": "node scripts/validate-links.js"
+  },
+  "devDependencies": {
+    "lefthook": "^1.5.0",
+    "markdownlint-cli": "^0.35.0",
+    "yamllint": "^2.27.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "wordpress",
+    "release",
+    "versioning",
+    "semantic-versioning",
+    "changelog",
+    "plugin",
+    "theme",
+    "blocks",
+    "lightspeedwp"
+  ]
+}
