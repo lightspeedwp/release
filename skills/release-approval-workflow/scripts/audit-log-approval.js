@@ -229,11 +229,16 @@ class AuditLogApproval {
    * Sign audit log entry (HMAC-SHA256)
    */
   signEntry(entry) {
-    const secret = process.env.AUDIT_SIGN_KEY || 'default-key';
+    const secret = process.env.AUDIT_SIGN_KEY;
+    if (!secret) {
+      throw new Error('AUDIT_SIGN_KEY environment variable is required for signing');
+    }
+
     const data = JSON.stringify({
       id: entry.id,
       timestamp: entry.timestamp,
-      checksum: entry.checksum
+      checksum: entry.checksum,
+      previous_checksum: entry.previous_checksum || null
     });
 
     return crypto.createHmac('sha256', secret).update(data).digest('hex');
@@ -425,6 +430,17 @@ class AuditLogApproval {
     const headers = ['ID', 'Timestamp', 'Type', 'Stage', 'User', 'Role', 'Status', 'Comments'];
     const rows = [headers.map(h => `"${h}"`).join(',')];
 
+    const escapeCSVValue = (value) => {
+      const str = String(value || '');
+      // Escape quotes
+      const escaped = str.replace(/"/g, '""');
+      // Prefix cells that start with formula chars
+      if (/^[=+\-@\t\r]/.test(escaped)) {
+        return `"'${escaped}"`;
+      }
+      return `"${escaped}"`;
+    };
+
     for (const entry of entries) {
       const row = [
         entry.id,
@@ -434,9 +450,9 @@ class AuditLogApproval {
         entry.user || '',
         entry.role || '',
         entry.status,
-        (entry.comments || '').replace(/"/g, '""')
+        entry.comments || ''
       ];
-      rows.push(row.map(v => `"${v}"`).join(','));
+      rows.push(row.map(escapeCSVValue).join(','));
     }
 
     return rows.join('\n');

@@ -140,6 +140,20 @@ class ApprovalReportGenerator {
   }
 
   /**
+   * Helper: Escape HTML special characters
+   */
+  escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+  }
+
+  /**
    * Generate HTML report
    */
   generateHtmlReport(approval) {
@@ -160,7 +174,7 @@ class ApprovalReportGenerator {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Release Approval Report - ${approval.release_version}</title>
+  <title>Release Approval Report - ${this.escapeHtml(approval.release_version)}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }
     h1 { color: #333; border-bottom: 2px solid #0366d6; padding-bottom: 10px; }
@@ -350,7 +364,7 @@ class ApprovalReportGenerator {
     }
 
     for (const item of allEvidence) {
-      lines.push(`<div class="evidence-item">${item}</div>`);
+      lines.push(`<div class="evidence-item">${this.escapeHtml(item)}</div>`);
     }
 
     return lines.join('\n');
