@@ -1,0 +1,15 @@
+{
+  "eval_name": "enable-hooks-existing-theme",
+  "prompt": "Enable and Configure Git Hooks in an Existing Theme Project",
+  "category": "hook-configuration",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Hooks configured without breaking existing commits",
+      "Installation process is documented",
+      "Pre-commit checks validate theme.json",
+      "Team can optionally install hooks",
+      "Onboarding documentation is clear"
+    ]
+  }
+}

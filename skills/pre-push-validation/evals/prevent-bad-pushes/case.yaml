@@ -1,0 +1,30 @@
+eval_name: "prevent-bad-pushes"
+prompt: "Prevent Pushing Code That Fails Tests or Linting"
+category: "pre-push-validation"
+difficulty: "high"
+tags:
+  - "quality-gate"
+  - "testing"
+  - "linting"
+  - "ci-cd-prevention"
+scenario:
+  project_type: "wordpress-plugin"
+  has_tests: true
+  has_linting: true
+  previous_issues: [
+    "failed-tests",
+    "linting-errors",
+    "coding-standard-violations",
+    "quality-issues"
+  ]
+  max_validation_time_seconds: 120
+  allow_force_override: true
+expected_outcomes:
+  - "Tests run before push"
+  - "Linting checks run"
+  - "Coding standards validated"
+  - "Quality checks performed"
+  - "Clear error messages"
+  - "Fix suggestions provided"
+  - "Force flag available"
+difficulty_level: "advanced"

@@ -1,0 +1,20 @@
+{
+  "eval_name": "validate-release-readiness",
+  "prompt": "Validate That a Release Branch Is Ready to Push",
+  "category": "pre-push-validation",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Branch name follows convention",
+      "Version matches branch name",
+      "Changelog updated",
+      "Breaking changes documented",
+      "Deprecated functions marked",
+      "Git history is clean",
+      "Release notes prepared",
+      "Dependencies current",
+      "Security checked",
+      "README files current"
+    ]
+  }
+}

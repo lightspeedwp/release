@@ -1,0 +1,21 @@
+{
+  "eval_name": "validate-wordpress-org-requirements",
+  "prompt": "Validate That All WordPress.org Requirements Are Met",
+  "category": "wordpress-org-sync",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Code quality standards checked",
+      "Metadata validation complete",
+      "No obfuscated code",
+      "Security best practices verified",
+      "GPL license confirmed",
+      "Functionality tested",
+      "No PHP warnings/notices",
+      "Documentation complete",
+      "All violations identified",
+      "Remediation steps clear",
+      "Overall readiness determined"
+    ]
+  }
+}

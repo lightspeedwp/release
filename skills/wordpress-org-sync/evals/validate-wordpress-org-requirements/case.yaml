@@ -1,0 +1,29 @@
+eval_name: "validate-wordpress-org-requirements"
+prompt: "Validate That All WordPress.org Requirements Are Met"
+category: "wordpress-org-sync"
+difficulty: "high"
+tags:
+  - "wordpress-org"
+  - "validation"
+  - "requirements-check"
+  - "security-audit"
+scenario:
+  project_type: "wordpress-plugin-or-theme"
+  validation_categories:
+    - "code-quality"
+    - "metadata"
+    - "functionality"
+    - "security"
+    - "documentation"
+  total_checks: 20
+  repository: "wordpress-org"
+expected_outcomes:
+  - "Code quality validated"
+  - "Metadata checked"
+  - "Functionality tested"
+  - "Security reviewed"
+  - "Documentation verified"
+  - "Violations identified"
+  - "Remediation steps provided"
+  - "Overall readiness assessment"
+difficulty_level: "advanced"

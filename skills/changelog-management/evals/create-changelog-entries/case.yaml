@@ -1,0 +1,25 @@
+eval_name: "create-changelog-entries"
+prompt: "Create Changelog Entries for a Plugin's New Block and Bug Fix"
+category: "changelog-management"
+difficulty: "medium"
+tags:
+  - "changelog"
+  - "release-notes"
+  - "documentation"
+  - "keep-a-changelog"
+scenario:
+  project_type: "wordpress-plugin"
+  version: "2.6.0"
+  entry_types:
+    - "Added"
+    - "Fixed"
+  entry_count: 2
+  format: "keep-a-changelog-1.1.0"
+expected_outcomes:
+  - "Entries formatted per Keep a Changelog"
+  - "Added section for new block"
+  - "Fixed section for bug resolution"
+  - "Clear user-facing descriptions"
+  - "Proper categorization"
+  - "No duplicates"
+difficulty_level: "intermediate"

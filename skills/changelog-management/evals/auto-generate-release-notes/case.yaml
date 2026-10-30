@@ -1,0 +1,29 @@
+eval_name: "auto-generate-release-notes"
+prompt: "Auto-Generate Release Notes from Git Commits and PRs"
+category: "changelog-management"
+difficulty: "high"
+tags:
+  - "release-notes"
+  - "auto-generation"
+  - "git-parsing"
+  - "github-integration"
+scenario:
+  project_type: "wordpress-plugin"
+  version: "3.0.0"
+  release_type: "major"
+  commits_since_last_release: 47
+  merged_prs: 12
+  closed_issues: 8
+  breaking_changes: 3
+  new_features: 5
+  bug_fixes: 9
+expected_outcomes:
+  - "Git commits parsed"
+  - "Commits grouped by type"
+  - "PR and issue links included"
+  - "Breaking changes highlighted"
+  - "Human-friendly format"
+  - "Upgrade instructions included"
+  - "Migration guide provided"
+  - "Ready for GitHub Releases"
+difficulty_level: "advanced"

@@ -1,0 +1,27 @@
+eval_name: "run-full-quality-checks"
+prompt: "Run Full Quality Checks Before Pushing a Patch Release"
+category: "pre-push-validation"
+difficulty: "high"
+tags:
+  - "quality-assurance"
+  - "testing"
+  - "release-validation"
+  - "patch-release"
+scenario:
+  project_type: "wordpress-plugin"
+  release_type: "patch"
+  version: "2.5.3"
+  has_tests: true
+  test_count: 15
+  test_runtime_seconds: 30
+  quality_checks_required: 8
+expected_outcomes:
+  - "Unit tests run and pass"
+  - "PHP coding standards checked"
+  - "JavaScript/CSS linting passes"
+  - "Security scan completes"
+  - "Documentation validated"
+  - "Changelog verified"
+  - "Versions consistent"
+  - "Push blocked on any failure"
+difficulty_level: "advanced"

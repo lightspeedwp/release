@@ -1,0 +1,16 @@
+{
+  "eval_name": "validate-theme-json-readme",
+  "prompt": "Validate a Theme's theme.json and readme.txt Before Committing",
+  "category": "pre-commit-validation",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "theme.json validated against schema",
+      "readme.txt structure validated",
+      "Version format verified",
+      "Deprecated properties detected",
+      "Clear error messages provided",
+      "Validation blocks commit if errors found"
+    ]
+  }
+}

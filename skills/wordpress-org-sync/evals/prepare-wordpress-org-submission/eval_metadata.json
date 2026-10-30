@@ -1,0 +1,19 @@
+{
+  "eval_name": "prepare-wordpress-org-submission",
+  "prompt": "Prepare a Theme Package for First-Time WordPress.org Submission",
+  "category": "wordpress-org-sync",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "style.css headers complete and valid",
+      "readme.txt follows WordPress.org format",
+      "All required sections present",
+      "Screenshots properly sized and formatted",
+      "Theme code meets WordPress standards",
+      "No commercial restrictions",
+      "GPL license verified",
+      "Validation report comprehensive",
+      "Final .zip package ready to submit"
+    ]
+  }
+}

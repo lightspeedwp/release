@@ -1,0 +1,17 @@
+{
+  "eval_name": "create-changelog-entries",
+  "prompt": "Create Changelog Entries for a Plugin's New Block and Bug Fix",
+  "category": "changelog-management",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Entries follow Keep a Changelog format",
+      "Added section created for new feature",
+      "Fixed section created for bug",
+      "Clear user-facing descriptions",
+      "Proper categorization applied",
+      "No duplicate entries",
+      "Entries are findable in CHANGELOG.md"
+    ]
+  }
+}

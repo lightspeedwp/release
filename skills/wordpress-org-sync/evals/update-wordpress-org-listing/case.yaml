@@ -1,0 +1,31 @@
+eval_name: "update-wordpress-org-listing"
+prompt: "Update an Existing Plugin/Theme Listing on WordPress.org"
+category: "wordpress-org-sync"
+difficulty: "high"
+tags:
+  - "wordpress-org"
+  - "plugin-update"
+  - "svn-sync"
+  - "metadata-update"
+scenario:
+  project_type: "wordpress-plugin"
+  project_name: "Advanced Testimonials"
+  existing_on_wordpress_org: true
+  release_version: "2.5.0"
+  changes_to_sync:
+    - "readme.txt"
+    - "screenshots"
+    - "changelog"
+    - "description"
+    - "tags"
+    - "wp-tested-up-to"
+  repository: "wordpress-org"
+expected_outcomes:
+  - "Plugin structure validated"
+  - "Local vs WordPress.org compared"
+  - "SVN repository updated"
+  - "Screenshots uploaded"
+  - "Metadata synced"
+  - "Changelog visible"
+  - "Compatibility updated"
+difficulty_level: "advanced"

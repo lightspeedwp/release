@@ -1,0 +1,26 @@
+eval_name: "validate-hook-configuration"
+prompt: "Verify Git Hooks Are Properly Installed and Working"
+category: "hook-configuration"
+difficulty: "high"
+tags:
+  - "git-hooks"
+  - "validation"
+  - "testing"
+  - "troubleshooting"
+scenario:
+  project_type: "mixed"
+  has_existing_hooks: true
+  team_size: 5
+  reported_issues: [
+    "hooks-not-running",
+    "inconsistent-behavior",
+    "version-mismatch"
+  ]
+  validation_scope: "full-environment"
+expected_outcomes:
+  - "Validation script created"
+  - "Hook installation status checked"
+  - "Pre-commit hook execution verified"
+  - "Pre-push hook execution verified"
+  - "Troubleshooting guide provided"
+difficulty_level: "advanced"

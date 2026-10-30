@@ -1,0 +1,15 @@
+{
+  "eval_name": "setup-git-hooks-new-plugin",
+  "prompt": "Set Up Git Hooks for a New WordPress Plugin Project",
+  "category": "hook-configuration",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "lefthook.yml created with proper configuration",
+      "Pre-commit hooks validate PHP and version",
+      "Pre-push hooks run security checks",
+      "Configuration is version-controlled",
+      "Team can install hooks with single command"
+    ]
+  }
+}

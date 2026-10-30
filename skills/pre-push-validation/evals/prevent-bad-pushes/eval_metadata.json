@@ -1,0 +1,18 @@
+{
+  "eval_name": "prevent-bad-pushes",
+  "prompt": "Prevent Pushing Code That Fails Tests or Linting",
+  "category": "pre-push-validation",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Tests run before push",
+      "Linting checks execute",
+      "Coding standards verified",
+      "Quality issues detected",
+      "Error messages are clear",
+      "Fix guidance provided",
+      "Force override available",
+      "Validation completes in < 2 minutes"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+eval_name: "prevent-broken-commits"
+prompt: "Catch PHP Syntax Errors Before Committing"
+category: "pre-commit-validation"
+difficulty: "high"
+tags:
+  - "php-syntax"
+  - "linting"
+  - "error-prevention"
+  - "quality-gate"
+scenario:
+  project_type: "wordpress-plugin-or-theme"
+  validation_tool: "php-linter"
+  should_catch_errors: true
+  should_block_commit: true
+  sample_errors:
+    - "missing-semicolon"
+    - "unmatched-bracket"
+    - "unclosed-string"
+    - "invalid-function-syntax"
+expected_outcomes:
+  - "PHP syntax validation runs on all .php files"
+  - "Exact line numbers reported"
+  - "Error types identified"
+  - "Suggested fixes provided"
+  - "Commit blocked on syntax errors"
+difficulty_level: "advanced"

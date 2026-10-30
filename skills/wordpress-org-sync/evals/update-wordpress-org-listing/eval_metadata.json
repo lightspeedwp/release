@@ -1,0 +1,19 @@
+{
+  "eval_name": "update-wordpress-org-listing",
+  "prompt": "Update an Existing Plugin/Theme Listing on WordPress.org",
+  "category": "wordpress-org-sync",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Plugin structure validated",
+      "Local version compared with WordPress.org",
+      "SVN repository updated",
+      "readme.txt synced",
+      "Screenshots uploaded",
+      "Description updated",
+      "Changelog published",
+      "Compatibility marked",
+      "All metadata synchronized"
+    ]
+  }
+}

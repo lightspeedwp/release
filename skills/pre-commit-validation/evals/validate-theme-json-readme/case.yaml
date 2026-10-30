@@ -1,0 +1,24 @@
+eval_name: "validate-theme-json-readme"
+prompt: "Validate a Theme's theme.json and readme.txt Before Committing"
+category: "pre-commit-validation"
+difficulty: "medium"
+tags:
+  - "theme-validation"
+  - "theme-json"
+  - "readme-validation"
+  - "json-schema"
+scenario:
+  project_type: "wordpress-theme"
+  files_to_validate:
+    - "theme.json"
+    - "readme.txt"
+  validation_type: "strict"
+  has_schema_errors: true
+  should_block_commit: true
+expected_outcomes:
+  - "theme.json validated against WordPress schema"
+  - "readme.txt structure validated"
+  - "Version format checked"
+  - "Deprecated properties detected"
+  - "Actionable error messages provided"
+difficulty_level: "intermediate"

@@ -1,0 +1,17 @@
+{
+  "eval_name": "prevent-broken-commits",
+  "prompt": "Catch PHP Syntax Errors Before Committing",
+  "category": "pre-commit-validation",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "PHP linter runs on all modified .php files",
+      "Syntax errors detected accurately",
+      "Line numbers reported correctly",
+      "Error types identified",
+      "Suggested fixes provided",
+      "Commit blocked on any error",
+      "No false positives"
+    ]
+  }
+}

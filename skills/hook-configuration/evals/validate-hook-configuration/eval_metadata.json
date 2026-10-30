@@ -1,0 +1,16 @@
+{
+  "eval_name": "validate-hook-configuration",
+  "prompt": "Verify Git Hooks Are Properly Installed and Working",
+  "category": "hook-configuration",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Validation script created and functional",
+      "Checks lefthook installation status",
+      "Verifies hook file presence",
+      "Tests pre-commit hook execution",
+      "Tests pre-push hook execution",
+      "Troubleshooting guide is comprehensive"
+    ]
+  }
+}

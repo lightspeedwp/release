@@ -1,0 +1,24 @@
+eval_name: "prepare-wordpress-org-submission"
+prompt: "Prepare a Theme Package for First-Time WordPress.org Submission"
+category: "wordpress-org-sync"
+difficulty: "high"
+tags:
+  - "wordpress-org"
+  - "theme-submission"
+  - "packaging"
+  - "first-submission"
+scenario:
+  project_type: "wordpress-theme"
+  project_name: "Modern Agency"
+  submission_type: "new"
+  repository: "wordpress-org"
+  requirements_to_check: 7
+expected_outcomes:
+  - "style.css headers correct"
+  - "readme.txt properly formatted"
+  - "WordPress.org requirements validated"
+  - "Screenshots prepared (480x360px)"
+  - "Package meets theme standards"
+  - "Validation report provided"
+  - "Final .zip package created"
+difficulty_level: "advanced"

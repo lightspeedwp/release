@@ -1,0 +1,28 @@
+eval_name: "validate-plugin-structure"
+prompt: "Validate Plugin Files and Structure Before Commit"
+category: "pre-commit-validation"
+difficulty: "medium"
+tags:
+  - "plugin-validation"
+  - "structure-check"
+  - "metadata-validation"
+  - "version-consistency"
+scenario:
+  project_type: "wordpress-plugin"
+  project_name: "Advanced Testimonials"
+  files_modified: [
+    "advanced-testimonials.php",
+    "includes/Class*.php",
+    "blocks/*.json"
+  ]
+  validation_scope: "full-structure"
+  expected_validation_checks: 7
+expected_outcomes:
+  - "Plugin headers validated"
+  - "Version consistency checked"
+  - "PHP syntax validated"
+  - "Block definitions validated"
+  - "Plugin slug consistency verified"
+  - "Text domain verified"
+  - "Specific fix guidance provided"
+difficulty_level: "intermediate"

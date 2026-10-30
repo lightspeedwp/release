@@ -1,0 +1,19 @@
+{
+  "eval_name": "auto-generate-release-notes",
+  "prompt": "Auto-Generate Release Notes from Git Commits and PRs",
+  "category": "changelog-management",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Commits parsed from git history",
+      "Commits grouped by type",
+      "PR and issue links included",
+      "Breaking changes identified and highlighted",
+      "Human-friendly format",
+      "All changes accounted for",
+      "Upgrade instructions provided",
+      "Migration guide for breaking changes",
+      "Ready for GitHub Releases publication"
+    ]
+  }
+}

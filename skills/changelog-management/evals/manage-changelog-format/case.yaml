@@ -1,0 +1,29 @@
+eval_name: "manage-changelog-format"
+prompt: "Maintain Keep a Changelog Format Across Releases"
+category: "changelog-management"
+difficulty: "high"
+tags:
+  - "changelog-format"
+  - "keep-a-changelog"
+  - "consistency"
+  - "audit"
+scenario:
+  project_type: "wordpress-plugin-or-theme"
+  release_count: 15
+  format_issues: [
+    "inconsistent-version-headers",
+    "mixed-date-formats",
+    "missing-links",
+    "unreleased-entries",
+    "categorization-errors"
+  ]
+  format_standard: "keep-a-changelog-1.1.0"
+expected_outcomes:
+  - "Format audit completed"
+  - "Version headers standardized"
+  - "Date formats normalized"
+  - "All sections properly categorized"
+  - "Links added/standardized"
+  - "Unreleased entries dated"
+  - "Complete corrected CHANGELOG.md"
+difficulty_level: "advanced"

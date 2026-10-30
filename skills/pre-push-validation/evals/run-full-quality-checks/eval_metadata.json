@@ -1,0 +1,19 @@
+{
+  "eval_name": "run-full-quality-checks",
+  "prompt": "Run Full Quality Checks Before Pushing a Patch Release",
+  "category": "pre-push-validation",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Unit tests pass",
+      "PHP coding standards met",
+      "JS/CSS linting passes",
+      "Security scan completes",
+      "Documentation verified",
+      "Changelog updated",
+      "Versions consistent",
+      "Comprehensive feedback provided",
+      "Push blocked on failure"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+eval_name: "validate-release-readiness"
+prompt: "Validate That a Release Branch Is Ready to Push"
+category: "pre-push-validation"
+difficulty: "high"
+tags:
+  - "release-validation"
+  - "production-readiness"
+  - "branch-validation"
+  - "version-consistency"
+scenario:
+  project_type: "wordpress-plugin"
+  branch_name: "release/2.5.3"
+  version: "2.5.3"
+  validation_checks: 10
+  should_catch_issues: true
+expected_outcomes:
+  - "Branch name validated"
+  - "Version consistency checked"
+  - "Changelog verified"
+  - "Breaking changes documented"
+  - "Dependencies current"
+  - "Security checked"
+  - "Release notes verified"
+  - "Production-readiness confirmed"
+difficulty_level: "advanced"

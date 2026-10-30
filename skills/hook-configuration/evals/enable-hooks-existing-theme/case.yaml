@@ -1,0 +1,24 @@
+eval_name: "enable-hooks-existing-theme"
+prompt: "Enable and Configure Git Hooks in an Existing Theme Project"
+category: "hook-configuration"
+difficulty: "medium"
+tags:
+  - "git-hooks"
+  - "retrofit"
+  - "existing-project"
+  - "wordpress-theme"
+scenario:
+  project_type: "wordpress-theme"
+  project_name: "Modern Agency"
+  existing_commits: 47
+  active_branches: 3
+  team_size: 3
+  has_existing_hooks: false
+  setup_complexity: "retrofit-existing"
+expected_outcomes:
+  - "lefthook.yml created without disrupting existing commits"
+  - "Hook installation is optional/non-breaking"
+  - "Pre-commit validation for theme.json"
+  - "Pre-push validation configured"
+  - "Team documentation provided"
+difficulty_level: "intermediate"

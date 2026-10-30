@@ -1,0 +1,23 @@
+eval_name: "setup-git-hooks-new-plugin"
+prompt: "Set Up Git Hooks for a New WordPress Plugin Project"
+category: "hook-configuration"
+difficulty: "medium"
+tags:
+  - "git-hooks"
+  - "pre-commit"
+  - "new-project"
+  - "wordpress-plugin"
+scenario:
+  project_type: "wordpress-plugin"
+  project_name: "Advanced Testimonials"
+  project_slug: "advanced-testimonials"
+  has_package_json: true
+  has_readme_txt: true
+  setup_complexity: "initial-setup"
+expected_outcomes:
+  - "lefthook.yml configured with pre-commit hooks"
+  - "Pre-commit hook validates PHP syntax"
+  - "Pre-commit hook validates version consistency"
+  - "Pre-push hook runs security checks"
+  - "Hook configuration is team-friendly"
+difficulty_level: "intermediate"

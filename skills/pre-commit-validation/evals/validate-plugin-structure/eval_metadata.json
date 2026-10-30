@@ -1,0 +1,17 @@
+{
+  "eval_name": "validate-plugin-structure",
+  "prompt": "Validate Plugin Files and Structure Before Commit",
+  "category": "pre-commit-validation",
+  "assertions": [],
+  "metrics": {
+    "success_criteria": [
+      "Plugin headers validated",
+      "Version consistency verified",
+      "PHP syntax checked",
+      "Block JSON validated",
+      "Plugin slug consistent",
+      "Text domain correct",
+      "Actionable error messages provided"
+    ]
+  }
+}
