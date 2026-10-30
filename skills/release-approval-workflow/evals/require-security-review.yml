@@ -1,0 +1,156 @@
+name: Require Security Review Before Release
+description: Verify that release execution is blocked until security review approval is obtained
+
+test_cases:
+  - name: Block release without security approval
+    description: Release should be blocked if security review has not been completed
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review", "qa_review"]
+      - skip_security_scan_approval: true
+      - qa_approve: true
+    execute:
+      - attempt_release_publish:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "Security review approval required"
+      - release_published: false
+      - blocked_reason: "Missing required approval: security_review"
+
+  - name: Allow release with security approval
+    description: Release should proceed once security review approval is obtained
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review", "qa_review"]
+      - run_security_scan
+      - security_lead_approve: true
+      - qa_approve: true
+    execute:
+      - attempt_release_publish:
+          version: "2.1.0"
+    expected:
+      - status: "success"
+      - release_published: true
+      - approval_chain_verified: true
+      - audit_trail_recorded: true
+
+  - name: Block on security scan failures
+    description: Security review should block if critical vulnerabilities found
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - run_security_scan
+      - scan_result_severity: "critical"
+      - scan_finding_count: 3
+    execute:
+      - attempt_security_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "Critical vulnerabilities found in SAST scan"
+      - approval_auto_blocked: true
+      - security_lead_notification_sent: true
+
+  - name: Auto-approve on clean security scan
+    description: Security review should auto-approve if no vulnerabilities found
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+          auto_approve_threshold: "no_critical"
+      - run_security_scan
+      - scan_findings: []
+      - dependency_check_passed: true
+      - security_headers_validated: true
+    execute:
+      - check_approval_status:
+          version: "2.1.0"
+          stage: "security_review"
+    expected:
+      - status: "approved"
+      - auto_approved: true
+      - approval_timestamp_recorded: true
+      - evidence_attached: ["SAST report", "dependency audit", "header validation"]
+
+  - name: Require security lead override for medium findings
+    description: Medium-severity findings require security lead manual approval
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - run_security_scan
+      - scan_severity: "medium"
+      - scan_finding_count: 2
+    execute:
+      - security_lead_review:
+          version: "2.1.0"
+          approval_decision: "approve_with_comments"
+          comments: "Medium findings are acceptable, mitigated by input validation"
+    expected:
+      - status: "approved"
+      - approval_type: "manual_override"
+      - security_lead_approval_recorded: true
+      - override_justification_logged: true
+
+  - name: Dependency vulnerabilities block release
+    description: Known vulnerabilities in dependencies should block security approval
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - run_security_scan
+      - check_dependencies
+      - vulnerable_dependency_found:
+          package: "symfony/framework"
+          version: "5.1.0"
+          vulnerability: "CVE-2021-12234"
+          severity: "high"
+    execute:
+      - attempt_security_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - blocking_reason: "High-severity vulnerability in dependency"
+      - error_message: "symfony/framework 5.1.0 has unpatched CVE-2021-12234"
+      - required_action: "Update symfony/framework to >= 5.4.0"
+
+  - name: Security headers validation
+    description: Missing critical security headers should block approval
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - run_security_scan
+      - validate_security_headers
+      - missing_headers:
+          - "X-Frame-Options"
+          - "Content-Security-Policy"
+    execute:
+      - attempt_security_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "Missing critical security headers"
+      - missing_headers_list: ["X-Frame-Options", "Content-Security-Policy"]
+      - resolution_required: true
+
+validation_rules:
+  - security_review_is_required_stage: true
+  - security_review_cannot_be_skipped: true
+  - auto_approve_only_on_zero_findings: true
+  - critical_findings_always_block: true
+  - medium_findings_require_override: true
+  - security_lead_approval_mandatory: true
+  - approval_timeout_enforcement: true
+  - audit_trail_immutable: true

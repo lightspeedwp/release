@@ -1,0 +1,261 @@
+name: Require QA Sign-Off Before Release
+description: Verify that release execution is blocked until QA review and sign-off approval is obtained
+
+test_cases:
+  - name: Block release without QA approval
+    description: Release should be blocked if QA review has not been completed
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review", "qa_review"]
+      - security_approve: true
+      - skip_qa_approval: true
+    execute:
+      - attempt_release_publish:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "QA sign-off approval required"
+      - release_published: false
+      - blocked_reason: "Missing required approval: qa_review"
+
+  - name: Allow release with QA approval
+    description: Release should proceed once QA approval is obtained
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review", "qa_review"]
+      - security_approve: true
+      - run_qa_validation
+      - qa_lead_approve: true
+    execute:
+      - attempt_release_publish:
+          version: "2.1.0"
+    expected:
+      - status: "success"
+      - release_published: true
+      - qa_approval_verified: true
+      - qa_sign_off_timestamp_recorded: true
+
+  - name: Block on insufficient test coverage
+    description: QA review should block if code coverage below threshold
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+          coverage_threshold: 70
+      - run_qa_validation
+      - test_coverage_percentage: 45
+      - coverage_warning: true
+    execute:
+      - attempt_qa_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "Test coverage below minimum threshold (45% < 70%)"
+      - approval_auto_blocked: true
+      - qa_lead_notification_sent: true
+      - required_action: "Increase test coverage to >= 70%"
+
+  - name: Block on failing tests
+    description: QA review should block if test suite has failures
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+      - run_test_suite
+      - test_results:
+          total: 150
+          passed: 145
+          failed: 5
+          skipped: 0
+    execute:
+      - attempt_qa_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "5 test failures must be resolved before release"
+      - failing_tests_reported: true
+      - qa_lead_notification_sent: true
+      - test_failure_details_attached: true
+
+  - name: Validate changelog completeness
+    description: QA should validate changelog has entries for all changes
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+      - validate_changelog_entries
+      - changelog_sections:
+          added: []
+          changed: []
+          fixed: []
+          deprecated: []
+    execute:
+      - attempt_qa_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "Changelog has no entries for version 2.1.0"
+      - changelog_validation_failed: true
+      - required_action: "Add changelog entries for all changes"
+
+  - name: Validate version format
+    description: QA should validate version follows SemVer
+    setup:
+      - create_release_version: "2.1"
+      - create_approval_request:
+          version: "2.1"
+          stages: ["qa_review"]
+    execute:
+      - attempt_qa_approval:
+          version: "2.1"
+    expected:
+      - status: "blocked"
+      - error_message: "Version format invalid: must follow MAJOR.MINOR.PATCH"
+      - version_validation_failed: true
+      - required_action: "Use proper SemVer format (e.g., 2.1.0)"
+
+  - name: Validate documentation completeness
+    description: QA should validate README and installation documentation
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+      - validate_documentation
+      - missing_sections:
+          - "Installation Instructions"
+          - "Usage Examples"
+          - "Troubleshooting"
+    execute:
+      - attempt_qa_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "README missing required sections"
+      - missing_documentation: ["Installation Instructions", "Usage Examples", "Troubleshooting"]
+      - required_action: "Add missing documentation sections"
+
+  - name: Auto-approve with sufficient coverage and passing tests
+    description: QA review should auto-approve if coverage >= threshold and all tests pass
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+          auto_approve_threshold: "coverage_85_tests_pass"
+      - run_qa_validation
+      - test_coverage_percentage: 87
+      - test_results:
+          total: 150
+          passed: 150
+          failed: 0
+          skipped: 0
+      - changelog_validated: true
+      - documentation_complete: true
+      - version_format_valid: true
+    execute:
+      - check_approval_status:
+          version: "2.1.0"
+          stage: "qa_review"
+    expected:
+      - status: "approved"
+      - auto_approved: true
+      - approval_timestamp_recorded: true
+      - qa_lead_notification_sent: true
+      - evidence_attached:
+          - "Test coverage report: 87%"
+          - "Test execution summary: 150/150 passed"
+          - "Changelog validation passed"
+          - "Documentation validation passed"
+
+  - name: QA override for known issues
+    description: QA lead can override approval with documented known issues
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+          coverage_threshold: 70
+      - run_qa_validation
+      - test_coverage_percentage: 65
+    execute:
+      - qa_lead_approve:
+          version: "2.1.0"
+          approval_decision: "approve_with_known_issues"
+          comments: "Coverage at 65% acceptable - known issue with UI test flakiness documented in README"
+          documented_issues:
+            - "UI tests flaky in CI environment"
+            - "Color picker tests skip on Windows"
+    expected:
+      - status: "approved"
+      - approval_type: "manual_override"
+      - qa_lead_approval_recorded: true
+      - override_justification_logged: true
+      - known_issues_documented: true
+      - github_issue_created: true
+
+  - name: Require all tests to pass on platform
+    description: Tests must pass on minimum supported versions
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+      - run_qa_validation_multi_platform
+      - test_matrix:
+          php_5_6: "FAILED"
+          php_7_0: "PASSED"
+          php_7_4: "PASSED"
+          wordpress_5_0: "PASSED"
+          wordpress_5_5: "PASSED"
+    execute:
+      - attempt_qa_approval:
+          version: "2.1.0"
+    expected:
+      - status: "blocked"
+      - error_message: "Tests failing on minimum supported PHP version (5.6)"
+      - failing_platforms: ["PHP 5.6"]
+      - required_action: "Ensure tests pass on all minimum supported versions"
+
+  - name: Track QA approval timeline
+    description: QA approval should record all timestamps and decision history
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+          requested_at: "2024-01-15T10:00:00Z"
+      - run_qa_validation
+      - qa_lead_starts_review: "2024-01-15T10:30:00Z"
+      - qa_lead_requests_changes: "2024-01-15T11:00:00Z"
+      - developer_makes_changes: "2024-01-15T13:00:00Z"
+      - qa_lead_approves: "2024-01-15T14:00:00Z"
+    execute:
+      - retrieve_approval_history:
+          version: "2.1.0"
+    expected:
+      - approval_timeline:
+          requested: "2024-01-15T10:00:00Z"
+          review_started: "2024-01-15T10:30:00Z"
+          changes_requested: "2024-01-15T11:00:00Z"
+          approved: "2024-01-15T14:00:00Z"
+      - total_review_time_hours: 4
+      - status_change_count: 3
+
+validation_rules:
+  - qa_review_is_required_stage: true
+  - qa_review_cannot_be_skipped: true
+  - failing_tests_always_block: true
+  - low_coverage_blocks_approval: true
+  - auto_approve_only_on_high_quality: true
+  - qa_lead_approval_mandatory_if_override: true
+  - approval_timeout_enforcement: true
+  - known_issues_must_be_documented: true
+  - audit_trail_immutable: true

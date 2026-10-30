@@ -1,0 +1,306 @@
+name: Track Approval Audit Trail
+description: Verify that all approvals are logged, immutable, and complete approval history is maintained
+
+test_cases:
+  - name: Create approval record with complete metadata
+    description: Each approval should record all relevant metadata and timestamps
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          requested_by: "developer@example.com"
+          requested_at: "2024-01-15T10:30:00Z"
+          stages: ["security_review", "qa_review"]
+    execute:
+      - retrieve_approval_record:
+          version: "2.1.0"
+    expected:
+      - approval_record_exists: true
+      - approval_id: "APR-2024-001"
+      - version: "2.1.0"
+      - requested_by: "developer@example.com"
+      - requested_at: "2024-01-15T10:30:00Z"
+      - stages_required: ["security_review", "qa_review"]
+      - current_status: "pending_security_review"
+
+  - name: Log security review approval with evidence
+    description: Security review approval should record approver, timestamp, and attached evidence
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - run_security_scan
+      - generate_sast_report: "sast-report-2024-01-15.json"
+      - generate_dependency_audit: "dependency-audit-2024-01-15.json"
+      - security_lead_approval:
+          approver_id: "security_lead@example.com"
+          approved_at: "2024-01-15T11:00:00Z"
+          comments: "No critical vulnerabilities found. SAST scan clean, dependencies current."
+          evidence:
+            - sast_report
+            - dependency_audit
+            - security_headers_validation
+    execute:
+      - retrieve_approval_record:
+          version: "2.1.0"
+    expected:
+      - approval_stage: "security_review"
+      - approval_status: "approved"
+      - approver_id: "security_lead@example.com"
+      - approved_at_timestamp: "2024-01-15T11:00:00Z"
+      - approver_comments: "No critical vulnerabilities found. SAST scan clean, dependencies current."
+      - evidence_count: 3
+      - attached_evidence:
+          - type: "sast_report"
+            filename: "sast-report-2024-01-15.json"
+            attached_at: "2024-01-15T11:00:00Z"
+          - type: "dependency_audit"
+            filename: "dependency-audit-2024-01-15.json"
+            attached_at: "2024-01-15T11:00:00Z"
+          - type: "security_headers_validation"
+            status: "passed"
+
+  - name: Log QA review approval with test results
+    description: QA review approval should record test coverage and results evidence
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["qa_review"]
+      - run_test_suite
+      - generate_coverage_report: "coverage-report-2024-01-15.json"
+      - qa_lead_approval:
+          approver_id: "qa@example.com"
+          approved_at: "2024-01-15T14:30:00Z"
+          comments: "All tests passing, coverage 87%, ready for production"
+          evidence:
+            - test_results: {total: 150, passed: 150, failed: 0}
+            - code_coverage: 87
+            - coverage_report_file: "coverage-report-2024-01-15.json"
+    execute:
+      - retrieve_approval_record:
+          version: "2.1.0"
+    expected:
+      - approval_stage: "qa_review"
+      - approval_status: "approved"
+      - approver_id: "qa@example.com"
+      - approved_at_timestamp: "2024-01-15T14:30:00Z"
+      - approver_comments: "All tests passing, coverage 87%, ready for production"
+      - evidence_test_results:
+          total: 150
+          passed: 150
+          failed: 0
+      - evidence_code_coverage: 87
+      - coverage_report_attached: true
+
+  - name: Log approval rejection and resolution
+    description: Approval rejection should be logged with reason and resolution
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - run_security_scan
+      - security_lead_rejection:
+          rejector_id: "security_lead@example.com"
+          rejected_at: "2024-01-15T11:00:00Z"
+          reason: "Critical SQL injection vulnerability found on line 142"
+          finding_details:
+            file: "includes/database.php"
+            line: 142
+            vulnerability: "SQL Injection"
+            severity: "critical"
+      - developer_fixes_issue: "2024-01-15T13:00:00Z"
+      - security_lead_re_approves:
+          approver_id: "security_lead@example.com"
+          approved_at: "2024-01-15T13:30:00Z"
+          comments: "Vulnerability fixed with prepared statements. Re-scan clean."
+    execute:
+      - retrieve_approval_history:
+          version: "2.1.0"
+    expected:
+      - initial_rejection_recorded: true
+      - rejection_timestamp: "2024-01-15T11:00:00Z"
+      - rejection_reason: "Critical SQL injection vulnerability found on line 142"
+      - resolution_recorded: true
+      - resolution_timestamp: "2024-01-15T13:00:00Z"
+      - final_approval_recorded: true
+      - final_approval_timestamp: "2024-01-15T13:30:00Z"
+      - approval_count: 2
+      - status_change_history:
+          - {timestamp: "2024-01-15T11:00:00Z", status: "rejected", reason: "Critical vulnerability"}
+          - {timestamp: "2024-01-15T13:30:00Z", status: "approved", reason: "Issue resolved"}
+
+  - name: Immutability of audit trail
+    description: Historical approval records should be immutable and tamper-proof
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review"]
+      - security_lead_approval:
+          approver_id: "security_lead@example.com"
+          approved_at: "2024-01-15T11:00:00Z"
+          comments: "Approved for release"
+      - record_hash: "sha256_hash_of_approval_record"
+      - attempt_modification:
+          field: "comments"
+          new_value: "Not approved - security issues found"
+    execute:
+      - verify_audit_trail_integrity:
+          version: "2.1.0"
+          expected_hash: "sha256_hash_of_approval_record"
+    expected:
+      - audit_trail_immutable: true
+      - hash_verification_passed: true
+      - hash_mismatch_detected: false
+      - modification_blocked: true
+      - error_message: "Cannot modify immutable approval record"
+      - tampering_alert_sent: true
+
+  - name: Complete approval chain for multi-stage release
+    description: Track all stages and approvers in sequence for a complete release cycle
+    setup:
+      - create_release_version: "2.1.0"
+      - create_approval_request:
+          version: "2.1.0"
+          stages: ["security_review", "qa_review", "compliance_review"]
+          requested_by: "developer@example.com"
+          requested_at: "2024-01-15T08:00:00Z"
+      - security_lead_approval:
+          approver_id: "security_lead@example.com"
+          approved_at: "2024-01-15T09:30:00Z"
+      - qa_lead_approval:
+          approver_id: "qa@example.com"
+          approved_at: "2024-01-15T14:00:00Z"
+      - compliance_lead_approval:
+          approver_id: "compliance@example.com"
+          approved_at: "2024-01-15T16:30:00Z"
+      - release_published:
+          published_at: "2024-01-15T17:00:00Z"
+    execute:
+      - retrieve_complete_audit_trail:
+          version: "2.1.0"
+    expected:
+      - approval_chain:
+          - {stage: "security_review", approver: "security_lead@example.com", approved_at: "2024-01-15T09:30:00Z", duration_minutes: 90}
+          - {stage: "qa_review", approver: "qa@example.com", approved_at: "2024-01-15T14:00:00Z", duration_minutes: 270}
+          - {stage: "compliance_review", approver: "compliance@example.com", approved_at: "2024-01-15T16:30:00Z", duration_minutes: 150}
+      - total_approval_time_minutes: 510
+      - release_published_at: "2024-01-15T17:00:00Z"
+      - all_approvals_verified: true
+      - status: "released"
+
+  - name: Emergency override logged with justification
+    description: Emergency override events should be thoroughly logged with business justification
+    setup:
+      - create_release_version: "2.0.1"
+      - create_approval_request:
+          version: "2.0.1"
+          stages: ["security_review", "qa_review"]
+          requested_by: "developer@example.com"
+          requested_at: "2024-01-15T18:00:00Z"
+      - emergency_override_initiated:
+          initiated_by: "developer@example.com"
+          initiated_at: "2024-01-15T18:05:00Z"
+          business_justification: "Production outage affecting 1000+ sites - critical data loss"
+          bypassed_stages: ["qa_review"]
+          notified_approvers: ["security_lead@example.com", "qa@example.com"]
+      - security_lead_authorizes_override:
+          authorizer_id: "security_lead@example.com"
+          authorized_at: "2024-01-15T18:15:00Z"
+          authorization_comments: "Critical data loss confirmed, risk acceptable"
+      - qa_lead_notified:
+          notified_at: "2024-01-15T18:15:00Z"
+          notification_method: "email"
+      - release_published_with_override:
+          published_at: "2024-01-15T18:20:00Z"
+          override_flag: true
+      - post_incident_review_scheduled:
+          scheduled_for: "2024-01-16T10:00:00Z"
+    execute:
+      - retrieve_approval_record:
+          version: "2.0.1"
+    expected:
+      - emergency_override_flag: true
+      - override_initiated_by: "developer@example.com"
+      - override_initiated_at: "2024-01-15T18:05:00Z"
+      - business_justification_recorded: "Production outage affecting 1000+ sites - critical data loss"
+      - authorization_required: true
+      - authorized_by: "security_lead@example.com"
+      - authorized_at: "2024-01-15T18:15:00Z"
+      - authorization_comments_recorded: true
+      - bypassed_stages: ["qa_review"]
+      - post_incident_review_scheduled: true
+      - post_incident_review_date: "2024-01-16T10:00:00Z"
+      - override_audit_entry_immutable: true
+
+  - name: Export audit trail for regulatory compliance
+    description: Complete approval audit trail should be exportable in compliance-friendly format
+    setup:
+      - create_release_version: "1.5.0"
+      - complete_approval_cycle:
+          security_approval: true
+          qa_approval: true
+          compliance_approval: true
+      - release_published: true
+    execute:
+      - export_audit_trail:
+          version: "1.5.0"
+          format: "json"
+          include: ["approvals", "evidence", "timestamps", "approvers"]
+    expected:
+      - export_successful: true
+      - export_format: "json"
+      - export_contains:
+          - approval_request_details
+          - approval_chain
+          - all_approvers_with_roles
+          - timestamps_for_all_events
+          - evidence_references
+          - approval_comments
+          - overall_release_status
+      - digital_signature_included: true
+      - export_timestamp_recorded: "2024-01-15T18:30:00Z"
+
+  - name: Approval timeline visualization
+    description: Generate approval timeline showing all stages, durations, and bottlenecks
+    setup:
+      - create_release_version: "2.1.0"
+      - approval_timeline:
+          - {event: "Approval requested", timestamp: "2024-01-15T08:00:00Z"}
+          - {event: "Security review started", timestamp: "2024-01-15T08:30:00Z"}
+          - {event: "Security review approved", timestamp: "2024-01-15T09:30:00Z", duration_minutes: 60}
+          - {event: "QA review started", timestamp: "2024-01-15T09:45:00Z"}
+          - {event: "QA requests changes", timestamp: "2024-01-15T11:00:00Z"}
+          - {event: "Developer makes changes", timestamp: "2024-01-15T13:00:00Z"}
+          - {event: "QA re-review started", timestamp: "2024-01-15T13:15:00Z"}
+          - {event: "QA approved", timestamp: "2024-01-15T14:00:00Z", duration_minutes: 225}
+          - {event: "Release published", timestamp: "2024-01-15T14:30:00Z"}
+    execute:
+      - generate_approval_timeline:
+          version: "2.1.0"
+    expected:
+      - timeline_generated: true
+      - total_approval_time_hours: 6.5
+      - timeline_stages:
+          - {stage: "security_review", duration_minutes: 60, status: "approved"}
+          - {stage: "qa_review", duration_minutes: 225, status: "approved"}
+      - longest_stage: "qa_review"
+      - longest_stage_duration_minutes: 225
+      - bottlenecks_identified: ["QA review took 3.75 hours, including re-review cycle"]
+
+validation_rules:
+  - every_approval_recorded: true
+  - timestamps_required_for_all_events: true
+  - approver_identity_logged: true
+  - approval_comments_captured: true
+  - evidence_attached_and_referenced: true
+  - audit_trail_immutable: true
+  - hash_verification_supported: true
+  - tampering_detection_enabled: true
+  - emergency_overrides_logged: true
+  - post_incident_review_required: true
+  - audit_trail_exportable: true
+  - timeline_generation_supported: true

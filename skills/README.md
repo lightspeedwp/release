@@ -60,6 +60,31 @@ Learn more: `./changelog-management/SKILL.md`
 
 Learn more: `./wordpress-org-sync/SKILL.md`
 
+### 6. [release-approval-workflow](./release-approval-workflow/)
+**Multi-level review and approval gates before release execution**
+
+- Security review automation (SAST, dependency scanning)
+- QA sign-off with test coverage validation
+- Changelog and version auditing
+- Role-based approval workflow
+- Audit trail logging with immutability verification
+- Emergency override procedures for hotfixes
+
+Learn more: `./release-approval-workflow/SKILL.md`
+
+### 7. [multi-package-release](./multi-package-release/)
+**Orchestrate coordinated plugin + theme releases with version alignment and dependency validation**
+
+- Coordinate synchronized releases of matched package pairs
+- Validate version alignment and lock strategies
+- Check cross-package dependencies and constraints
+- Sequence releases with intelligent dependency ordering
+- Generate unified changelog entries across packages
+- Handle partial failures with rollback procedures
+- Grace period strategy for post-release verification
+
+Learn more: `./multi-package-release/SKILL.md`
+
 ## Existing Skills
 
 - **[github-release](./github-release/)** — GitHub tag, release, and asset publication
@@ -86,14 +111,21 @@ These skills are used together in the main `[[release]]` skill workflow:
 5. changelog-management
    ↓ (version & changelog updates)
    
-6. github-release
+6. release-approval-workflow
+   ↓ (security review, QA sign-off, compliance gates)
+   
+7. [multi-package-release or single package]
+   ↓ (if group defined: orchestrate matched packages)
+   ↓ (if single package: proceed to github-release)
+   
+8. github-release
    ↓ (GitHub publication)
    
-7. wordpress-org-sync
+9. wordpress-org-sync
    ↓ (WordPress.org publication)
    
-8. release-handoff-generator
-   ↓ (audit trail & documentation)
+10. release-handoff-generator
+    ↓ (audit trail & documentation)
 ```
 
 ## Skill Integration Points
@@ -101,7 +133,12 @@ These skills are used together in the main `[[release]]` skill workflow:
 - **[[release]]** — Orchestrates the complete release workflow
 - **[[hook-configuration]]** → [[pre-commit-validation]] → [[pre-push-validation]]
 - **[[pre-push-validation]]** → [[release-qa]] (blocker if validation fails)
-- **[[changelog-management]]** → [[github-release]] (provides release notes)
+- **[[release-qa]]** → [[changelog-management]] (version & changelog updates)
+- **[[changelog-management]]** → [[release-approval-workflow]] (approval gates)
+- **[[release-approval-workflow]]** → [[multi-package-release]] or [[github-release]]
+  - If multi-package group defined: delegate to [[multi-package-release]]
+  - If single package: proceed to [[github-release]]
+- **[[multi-package-release]]** → [[github-release]] (coordinates multi-package GitHub Releases)
 - **[[github-release]]** → [[wordpress-org-sync]] (coordinates publishing)
 - **[[wordpress-org-sync]]** → [[release-handoff-generator]] (audit trail)
 
