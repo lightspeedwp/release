@@ -2,23 +2,38 @@
 
 /**
  * JSON Validation Script
- * Validates all JSON files in the project for syntax errors
+ * Validates JSON files for syntax errors
+ *
+ * Usage:
+ *   node scripts/validate-json.js                    # Validate default files
+ *   node scripts/validate-json.js file1.json file2.json  # Validate specific files
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const jsonFiles = [
+// Files to validate if none provided
+const defaultFiles = [
   '.markdownlint.json',
   'package.json',
 ];
 
+// Get files from command line arguments or use defaults
+const filesToCheck = process.argv.length > 2 ? process.argv.slice(2) : defaultFiles;
+
 let hasErrors = false;
+let checkedCount = 0;
 
 console.log('🔍 Validating JSON files...\n');
 
-jsonFiles.forEach((file) => {
-  const filePath = path.join(__dirname, '..', file);
+filesToCheck.forEach((file) => {
+  // Skip non-JSON files
+  if (!file.endsWith('.json')) {
+    return;
+  }
+
+  checkedCount++;
+  const filePath = path.isAbsolute(file) ? file : path.join(__dirname, '..', file);
 
   if (!fs.existsSync(filePath)) {
     console.log(`⚠️  File not found: ${file}`);
@@ -38,7 +53,10 @@ jsonFiles.forEach((file) => {
 
 console.log('');
 
-if (hasErrors) {
+if (checkedCount === 0) {
+  console.log('ℹ️  No JSON files to validate');
+  process.exit(0);
+} else if (hasErrors) {
   console.error('❌ JSON validation failed');
   process.exit(1);
 } else {

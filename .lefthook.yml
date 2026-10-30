@@ -31,12 +31,7 @@ pre-commit:
       glob: "*.json"
       description: "🔍 Validating JSON files"
       run: |
-        for file in {staged_files}; do
-          if ! node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" 2>/dev/null; then
-            echo "❌ Invalid JSON in $file"
-            exit 1
-          fi
-        done
+        node scripts/validate-json.js {staged_files}
       skip:
         - merge
         - rebase
